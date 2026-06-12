@@ -211,6 +211,19 @@
     .repeat-btn:hover { background: #4a6a8a; }
     .repeat-btn:disabled { background: #aaa; cursor: not-allowed; }
 
+    .clear-btn {
+      padding: 8px;
+      font-size: 0.85rem;
+      background: #fff;
+      color: #888;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .clear-btn:hover { background: #f5f5f5; border-color: #999; color: #555; }
+
     .status {
       text-align: center;
       font-size: 0.82rem;
@@ -297,6 +310,7 @@
     </div>
     <button class="announce-btn" id="announceBtn" onclick="announce()">📢 案内する</button>
     <button class="repeat-btn" id="repeatBtn" onclick="repeatAnnounce()" disabled>🔁 もう一度</button>
+    <button class="clear-btn" onclick="clearDisplay()">現在ご案内していません</button>
     <div class="status" id="status">番号と診察室を選択してください</div>
     <div id="voicevoxStatus" style="text-align:center;font-size:0.78rem;padding:4px 8px;border-radius:4px;"></div>
   </div>
@@ -360,6 +374,10 @@
     });
   }
 
+  function clearDisplay() {
+    callRef.set({ cleared: true, timestamp: Date.now() });
+  }
+
   function repeatAnnounce() {
     if (lastPatient && lastRoom) {
       const speakerId = parseInt(document.getElementById('speakerSelect').value, 10);
@@ -382,22 +400,32 @@
     // 初回ロード時（ページ開いた瞬間）は再生しない
     if (prevTimestamp === null) {
       prevTimestamp = data.timestamp;
-      updateDisplay(data.patient, data.room);
-      lastPatient = data.patient;
-      lastRoom    = data.room;
-      document.getElementById('repeatBtn').disabled = false;
+      if (data.cleared) {
+        resetDisplay();
+      } else {
+        updateDisplay(data.patient, data.room);
+        lastPatient = data.patient;
+        lastRoom    = data.room;
+        document.getElementById('repeatBtn').disabled = false;
+      }
       return;
     }
 
-    // 新しい案内だけ再生
+    // 新しいイベントだけ処理
     if (data.timestamp !== prevTimestamp) {
       prevTimestamp = data.timestamp;
-      lastPatient = data.patient;
-      lastRoom    = data.room;
-      updateDisplay(data.patient, data.room);
-      addHistory(data.patient, data.room);
-      speakAnnouncement(data.patient, data.room, data.speakerId || 13);
-      document.getElementById('repeatBtn').disabled = false;
+
+      if (data.cleared) {
+        // 「ご案内していません」状態
+        resetDisplay();
+      } else {
+        lastPatient = data.patient;
+        lastRoom    = data.room;
+        updateDisplay(data.patient, data.room);
+        addHistory(data.patient, data.room);
+        speakAnnouncement(data.patient, data.room, data.speakerId || 13);
+        document.getElementById('repeatBtn').disabled = false;
+      }
     }
   });
 
@@ -501,6 +529,15 @@
   }
 
   // ── 表示・履歴 ───────────────────────────────────────────────
+  function resetDisplay() {
+    const numEl  = document.getElementById('displayNumber');
+    const roomEl = document.getElementById('displayRoom');
+    numEl.classList.add('empty');  numEl.textContent  = '現在ご案内していません';
+    roomEl.classList.add('empty'); roomEl.textContent = '－';
+    document.getElementById('repeatBtn').disabled = true;
+    setStatus('番号と診察室を選択してください');
+  }
+
   function updateDisplay(patient, room) {
     const numEl  = document.getElementById('displayNumber');
     const roomEl = document.getElementById('displayRoom');
