@@ -132,16 +132,46 @@
       width: 72px;
     }
 
+    .number-input-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .num-btn {
+      width: 44px;
+      height: 44px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: 2px solid #b0c8e0;
+      border-radius: 8px;
+      background: #f0f6fc;
+      color: #2c5f8a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .num-btn:hover  { background: #d0e8f8; }
+    .num-btn:active { background: #b0d0f0; }
+
     .form-row input[type="number"] {
       flex: 1;
-      padding: 8px 12px;
+      padding: 8px 4px;
       font-size: 1.1rem;
       border: 2px solid #b0c8e0;
       border-radius: 6px;
       text-align: center;
       outline: none;
       transition: border-color 0.2s;
+      -moz-appearance: textfield;
     }
+    .form-row input[type="number"]::-webkit-inner-spin-button,
+    .form-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
     .form-row input[type="number"]:focus {
       border-color: #2c5f8a;
@@ -293,7 +323,11 @@
   <div class="control-panel">
     <div class="form-row">
       <label>受診番号</label>
-      <input type="number" id="patientNumber" min="1" max="99" placeholder="1〜99" />
+      <div class="number-input-wrap">
+        <button class="num-btn" onclick="stepNumber(-1)">－</button>
+        <input type="number" id="patientNumber" min="1" max="99" placeholder="1〜99" />
+        <button class="num-btn" onclick="stepNumber(1)">＋</button>
+      </div>
     </div>
     <div class="form-row">
       <label>診察室</label>
@@ -346,6 +380,14 @@
   let lastPatient = null;
   let lastRoom = null;
   let currentAudio = null; // 再生中のVOICEVOX Audioオブジェクト
+
+  // ── 受診番号 ±ボタン ─────────────────────────────────────────
+  function stepNumber(delta) {
+    const input = document.getElementById('patientNumber');
+    const val = parseInt(input.value, 10) || 0;
+    const next = Math.min(99, Math.max(1, val + delta));
+    input.value = next;
+  }
 
   // ── 診察室選択 ───────────────────────────────────────────────
   function selectRoom(room) {
