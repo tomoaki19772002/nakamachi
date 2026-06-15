@@ -234,6 +234,28 @@
     .status.speaking { color: #2c8a5f; font-weight: bold; }
     .status.error { color: #c0392b; }
 
+    /* 音声有効化オーバーレイ */
+    #audioUnlock {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      cursor: pointer;
+    }
+    #audioUnlock .unlock-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 60px;
+      text-align: center;
+    }
+    #audioUnlock .unlock-icon { font-size: 3rem; margin-bottom: 12px; }
+    #audioUnlock .unlock-title { font-size: 1.3rem; font-weight: bold; color: #1a3a5c; margin-bottom: 8px; }
+    #audioUnlock .unlock-sub { font-size: 0.9rem; color: #666; }
+
     /* 履歴 */
     .history-section {
       width: 420px;
@@ -270,6 +292,15 @@
   </style>
 </head>
 <body>
+
+  <!-- 音声有効化オーバーレイ（初回タップ用） -->
+  <div id="audioUnlock" onclick="unlockAudio()">
+    <div class="unlock-box">
+      <div class="unlock-icon">🔊</div>
+      <div class="unlock-title">画面をタップして音声を有効にする</div>
+      <div class="unlock-sub">このデバイスで呼び出し音声を鳴らすには<br>一度タップが必要です</div>
+    </div>
+  </div>
 
   <h1>診察案内システム</h1>
   <p style="font-size:0.95rem;font-weight:bold;color:#555;letter-spacing:0.03em;line-height:1.6;text-align:center;margin-top:-12px;border:3px solid #2c5f8a;border-radius:6px;padding:6px 16px;background:#f7fafd;">
@@ -572,6 +603,28 @@
   document.getElementById('patientNumber').addEventListener('keydown', e => {
     if (e.key === 'Enter') announce();
   });
+
+  // ── 音声アンロック（Silk・モバイル対応）────────────────────
+  let audioUnlocked = false;
+
+  function unlockAudio() {
+    // 無音を再生してオートプレイを解除
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+
+    // speechSynthesis も初期化
+    if (window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance('');
+      window.speechSynthesis.speak(u);
+    }
+
+    audioUnlocked = true;
+    document.getElementById('audioUnlock').style.display = 'none';
+  }
 
   // 起動時 VOICEVOX 確認
   checkVoicevox();
