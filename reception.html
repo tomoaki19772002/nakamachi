@@ -426,11 +426,37 @@
     }
   });
 
+  // ── お知らせ音（チャイム）────────────────────────────────────
+  function playChime() {
+    return new Promise(resolve => {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [784, 1047, 988, 1319]; // G5 C6 B5 E6
+      let time = ctx.currentTime;
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.4, time + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+        osc.start(time);
+        osc.stop(time + 0.35);
+        time += 0.18;
+      });
+      setTimeout(resolve, notes.length * 180 + 200);
+    });
+  }
+
   // ── 音声（Web Speech API）────────────────────────────────────
   async function speakAnnouncement(patient, room) {
     const text = `${patient}番のかた、診察室${room}番に、おはいりください。`;
     setStatus(`読み上げ中: 「${text}」`, 'speaking');
     document.getElementById('announceBtn').disabled = true;
+
+    await playChime();
 
     await new Promise(resolve => {
       window.speechSynthesis.cancel();
