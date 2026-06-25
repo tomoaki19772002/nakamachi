@@ -283,7 +283,7 @@
 
     // ── 状態 ────────────────────────────────────────────────────
     let inputNum = 1;
-    let lastSpokenTs = 0;  // 自端末の呼び出しのみ音声再生
+    let lastSeenTs = 0;  // ページ読込時点のtsを記録し、新規呼び出しのみ音声再生
 
     // ── DOM ─────────────────────────────────────────────────────
     const currentNumberEl = document.getElementById('currentNumber');
@@ -319,9 +319,8 @@
     document.getElementById('callBtn').addEventListener('click', () => {
       const num = inputNum;
       const ts  = Date.now();
-      lastSpokenTs = ts;
 
-      // 現在番号を保存
+      // 現在番号を保存（全端末がこれを受信して音声再生）
       idouRef.set({ number: num, timestamp: ts });
 
       // 履歴に追記（重複なし）
@@ -331,18 +330,24 @@
         historyRef.set(arr);
       });
 
-      speak(num);
       showToast(`${num}番を呼び出しました`);
     });
 
-    // ── Firebase リアルタイム受信：現在番号 ──────────────────────
+    // ── Firebase リアルタイム受信：現在番号（全端末で音声再生） ──
+    let initialized = false;
     idouRef.on('value', snap => {
       const data = snap.val();
       if (data && data.number) {
         showCurrent(data.number);
+        // ページ読込後の新規呼び出しのみ音声再生（初回ロード時は鳴らさない）
+        if (initialized && data.timestamp > lastSeenTs) {
+          speak(data.number);
+        }
+        lastSeenTs = data.timestamp || 0;
       } else {
         showCurrent(null);
       }
+      initialized = true;
     });
 
     function showCurrent(num) {
