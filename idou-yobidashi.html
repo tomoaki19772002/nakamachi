@@ -494,22 +494,53 @@
     });
 
     // ── 音声読み上げ ────────────────────────────────────────────
+    // ── ベル音（Web Audio API） ──────────────────────────────────
+    function playBell() {
+      return new Promise(resolve => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // ベル音を2回鳴らす
+        const schedule = [0, 0.55];
+        schedule.forEach(startTime => {
+          const osc    = ctx.createOscillator();
+          const gain   = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.type      = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime + startTime);
+          osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + startTime + 0.6);
+
+          gain.gain.setValueAtTime(0, ctx.currentTime + startTime);
+          gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + startTime + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + 0.9);
+
+          osc.start(ctx.currentTime + startTime);
+          osc.stop(ctx.currentTime + startTime + 0.9);
+        });
+
+        // ベル2回分 + 余白後に解決
+        setTimeout(() => { ctx.close(); resolve(); }, 1600);
+      });
+    }
+
     function speak(num) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
 
-      const text = `${num}番のかた、診察室前の待合いすに移動してください`;
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang  = 'ja-JP';
-      utter.rate  = 0.88;
-      utter.pitch = 1.0;
+      playBell().then(() => {
+        const text  = `${num}番のかた、診察室前の待合いすに移動してください`;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang  = 'ja-JP';
+        utter.rate  = 0.88;
+        utter.pitch = 1.0;
 
-      // 日本語音声を優先選択
-      const voices = window.speechSynthesis.getVoices();
-      const jaVoice = voices.find(v => v.lang === 'ja-JP');
-      if (jaVoice) utter.voice = jaVoice;
+        const voices  = window.speechSynthesis.getVoices();
+        const jaVoice = voices.find(v => v.lang === 'ja-JP');
+        if (jaVoice) utter.voice = jaVoice;
 
-      window.speechSynthesis.speak(utter);
+        window.speechSynthesis.speak(utter);
+      });
     }
 
     // 音声一覧が非同期で読み込まれる場合の対応
