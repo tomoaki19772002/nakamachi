@@ -147,16 +147,23 @@
     .call-btn:hover  { background: linear-gradient(135deg, #1976d2, #1565c0); box-shadow: 0 8px 24px rgba(21,101,192,0.5); }
     .call-btn:active { transform: scale(0.97); }
 
+    .call-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .pause-btn {
-      padding: 6px 16px;
-      font-size: 0.78rem;
+      padding: 4px 10px;
+      font-size: 0.7rem;
       font-weight: bold;
       border: 1.5px solid #90a4ae;
-      border-radius: 20px;
+      border-radius: 14px;
       background: #fff;
       color: #78909c;
       cursor: pointer;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
       transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
     }
     .pause-btn:hover  { background: #eceff1; border-color: #546e7a; }
@@ -290,8 +297,10 @@
       <input class="number-display" type="number" id="inputNumber" value="1" min="1" max="100">
       <button class="num-btn" id="btnPlus">＋</button>
     </div>
-    <button class="call-btn" id="callBtn">呼び出す</button>
-    <button class="pause-btn" id="pauseBtn">現在、案内しておりません</button>
+    <div class="call-row">
+      <button class="call-btn" id="callBtn">呼び出す</button>
+      <button class="pause-btn" id="pauseBtn">不案内</button>
+    </div>
   </div>
 
   <!-- 履歴 -->
