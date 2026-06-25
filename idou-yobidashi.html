@@ -191,14 +191,35 @@
     }
 
     .history-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       background: #e3f2fd;
       color: #1565c0;
       font-size: 2.4rem;
       font-weight: bold;
-      padding: 12px 32px;
+      padding: 12px 20px 12px 32px;
       border-radius: 30px;
       letter-spacing: 0.05em;
     }
+
+    .history-chip-del {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #bbdefb;
+      color: #1565c0;
+      font-size: 1.2rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .history-chip-del:hover { background: #90caf9; }
 
     .history-empty {
       color: #b0bec5;
@@ -382,7 +403,23 @@
       [...arr].reverse().forEach(n => {
         const chip = document.createElement('span');
         chip.className = 'history-chip';
-        chip.textContent = `${n}番`;
+
+        const label = document.createElement('span');
+        label.textContent = `${n}番`;
+
+        const del = document.createElement('button');
+        del.className = 'history-chip-del';
+        del.textContent = '×';
+        del.title = `${n}番を削除`;
+        del.addEventListener('click', () => {
+          historyRef.once('value', snap => {
+            const updated = (snap.val() || []).filter(x => x !== n);
+            historyRef.set(updated);
+          });
+        });
+
+        chip.appendChild(label);
+        chip.appendChild(del);
         historyListEl.appendChild(chip);
       });
     }
