@@ -528,18 +528,26 @@
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
 
-      playChime().then(() => {
-        const text  = `${num}番のかた、検査室にお入りいただき、診察室前の、待合いすに移動してください`;
+      const text    = `${num}番のかた、検査室にお入りいただき、診察室前の、待合いすに移動してください`;
+      const voices  = window.speechSynthesis.getVoices();
+      const jaVoice = voices.find(v => v.lang === 'ja-JP');
+
+      const makeUtter = () => {
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang  = 'ja-JP';
         utter.rate  = 0.88;
         utter.pitch = 1.0;
-
-        const voices  = window.speechSynthesis.getVoices();
-        const jaVoice = voices.find(v => v.lang === 'ja-JP');
         if (jaVoice) utter.voice = jaVoice;
+        return utter;
+      };
 
-        window.speechSynthesis.speak(utter);
+      playChime().then(() => {
+        const u1 = makeUtter();
+        // 1回目が終わったら少し間を置いて2回目
+        u1.onend = () => setTimeout(() => {
+          window.speechSynthesis.speak(makeUtter());
+        }, 800);
+        window.speechSynthesis.speak(u1);
       });
     }
 
