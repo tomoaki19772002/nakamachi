@@ -14,3 +14,4 @@ waiting-time.html
 test_models.py
 
 .vercel
+node_modules/

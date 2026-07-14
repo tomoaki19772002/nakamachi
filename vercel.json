@@ -2,6 +2,8 @@
   "outputDirectory": ".",
   "rewrites": [
     { "source": "/idou", "destination": "/idou-yobidashi.html" },
+    { "source": "/ikenbako", "destination": "/ikenbako.html" },
+    { "source": "/line-yobidashi", "destination": "/line-yobidashi.html" },
     { "source": "/", "destination": "/reception.html" }
   ]
 }

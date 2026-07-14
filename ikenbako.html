@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ご意見箱 | 川越あさひ眼科</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      background: linear-gradient(135deg, #e8f4fd 0%, #d0e8f8 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0, 80, 160, 0.15);
+      padding: 48px 56px 56px;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .clinic-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #1565c0;
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1565c0;
+      letter-spacing: 0.12em;
+      text-align: center;
+      margin-bottom: 32px;
+      padding-bottom: 28px;
+      border-bottom: 2px solid #e3f0fb;
+    }
+
+    .lead-text {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+
+    .form-group { margin-bottom: 24px; }
+
+    .form-group label {
+      display: block;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+      letter-spacing: 0.03em;
+    }
+
+    .optional-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: normal;
+      color: #888;
+      background: #f0f0f0;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-left: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .required-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: normal;
+      color: #c62828;
+      background: #fdeaea;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-left: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group textarea {
+      width: 100%;
+      font-size: 1rem;
+      padding: 14px 16px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus { border-color: #1565c0; }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 160px;
+      line-height: 1.6;
+    }
+
+    .field-error {
+      color: #e53935;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      min-height: 1.2em;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background: #1565c0;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover { background: #0d47a1; }
+    .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .status-message {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      display: none;
+      letter-spacing: 0.03em;
+    }
+
+    .status-message.success {
+      display: block;
+      background: #e8f5e9;
+      border: 2px solid #66bb6a;
+      color: #2e7d32;
+    }
+
+    .status-message.error {
+      display: block;
+      background: #fdeaea;
+      border: 2px solid #ef5350;
+      color: #c62828;
+    }
+
+    /* Web3Forms の設定が未完了の場合に表示される案内 */
+    .setup-notice {
+      margin-top: 32px;
+      padding: 20px;
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      color: #856404;
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    .setup-notice strong { display: block; margin-bottom: 6px; font-size: 1rem; }
+
+    /* 送信中スピナー */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: -3px;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ハニーポット（ボット対策・非表示） */
+    .botcheck-field { position: absolute; left: -9999px; opacity: 0; }
+
+    @media (max-width: 600px) {
+      .card { padding: 32px 24px 40px; }
+      .page-title { font-size: 1.5rem; }
+      .clinic-name { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="clinic-name">川越あさひ眼科</div>
+  <div class="page-title">ご意見箱</div>
+
+  <p class="lead-text">
+    日頃の診療に関するご意見・ご感想・お気づきの点がございましたら、こちらのフォームよりお寄せください。<br>
+    お名前・メールアドレスの記入は任意です。いただいたご意見は、今後のサービス向上の参考にさせていただきます。
+  </p>
+
+  <form id="ikenbakoForm" novalidate>
+    <!-- ハニーポット（人間には見えない。ボットが入力した場合は送信を拒否） -->
+    <input type="text" name="botcheck" id="botcheck" class="botcheck-field" tabindex="-1" autocomplete="off">
+
+    <div class="form-group">
+      <label for="name">お名前<span class="optional-tag">任意</span></label>
+      <input type="text" id="name" name="name" placeholder="例：川越 太郎" maxlength="100">
+    </div>
+
+    <div class="form-group">
+      <label for="email">メールアドレス<span class="optional-tag">任意</span></label>
+      <input type="email" id="email" name="email" placeholder="例：example@mail.com">
+      <div class="field-error" id="emailError"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="message">ご意見箱の内容<span class="required-tag">必須</span></label>
+      <textarea id="message" name="message" placeholder="ご意見・ご感想をご自由にご記入ください"></textarea>
+      <div class="field-error" id="messageError"></div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">送信する</button>
+
+    <div class="status-message" id="statusMessage"></div>
+  </form>
+
+  <!-- Web3Forms の設定が未完了の場合に表示される案内 -->
+  <div class="setup-notice" id="setupNotice" style="display:none;">
+    <strong>設定が必要です</strong>
+    フォームを送信可能にするには、Web3Forms のアクセスキーが必要です。<br>
+    1. <code>https://web3forms.com</code> にアクセスし、送信先メールアドレス
+    （<code>tomoaki19772002@gmail.com</code>）で無料登録してください。<br>
+    2. 発行された Access Key を、このHTMLファイル内の <code>WEB3FORMS_ACCESS_KEY</code> に貼り付けてください。
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  //  ★ Web3Forms のアクセスキーをここに貼り付けてください ★
+  //  (https://web3forms.com で無料登録し、発行されたキーを設定)
+  //  送信先メールアドレスは Web3Forms 登録時に指定した
+  //  tomoaki19772002@gmail.com になります。
+  // ============================================================
+  const WEB3FORMS_ACCESS_KEY = 'eb9664f1-e3ef-4527-8355-b106812c107c';
+  // ============================================================
+
+  const IS_CONFIGURED = WEB3FORMS_ACCESS_KEY !== 'YOUR_ACCESS_KEY_HERE' && WEB3FORMS_ACCESS_KEY.trim() !== '';
+
+  if (!IS_CONFIGURED) {
+    document.getElementById('setupNotice').style.display = 'block';
+  }
+
+  const form = document.getElementById('ikenbakoForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusMessage = document.getElementById('statusMessage');
+  const messageError = document.getElementById('messageError');
+  const emailError = document.getElementById('emailError');
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    statusMessage.className = 'status-message';
+    statusMessage.textContent = '';
+    messageError.textContent = '';
+    emailError.textContent = '';
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    if (email && !EMAIL_PATTERN.test(email)) {
+      emailError.textContent = 'メールアドレスの形式が正しくありません（空欄でも送信できます）';
+      document.getElementById('email').focus();
+      return;
+    }
+
+    if (!message) {
+      messageError.textContent = 'ご意見箱の内容をご入力ください';
+      document.getElementById('message').focus();
+      return;
+    }
+
+    // ハニーポットにボットが入力していたら何もせず終了
+    if (document.getElementById('botcheck').value !== '') {
+      return;
+    }
+
+    if (!IS_CONFIGURED) {
+      statusMessage.className = 'status-message error';
+      statusMessage.textContent = '送信の設定が完了していません。管理者にお問い合わせください。';
+      return;
+    }
+
+    const payload = {
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: '【川越あさひ眼科】ご意見箱への投稿',
+      from_name: name || '匿名',
+      name: name || '匿名',
+      message: message
+    };
+    if (email) payload.email = email;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span>送信中...';
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        statusMessage.className = 'status-message success';
+        statusMessage.textContent = 'ご意見を送信しました。ありがとうございました。';
+        form.reset();
+      } else {
+        statusMessage.className = 'status-message error';
+        statusMessage.textContent = '送信に失敗しました。しばらくしてから再度お試しください。';
+      }
+    } catch (err) {
+      statusMessage.className = 'status-message error';
+      statusMessage.textContent = '送信中にエラーが発生しました。通信環境をご確認のうえ、再度お試しください。';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '送信する';
+    }
+  });
+</script>
+</body>
+</html>
