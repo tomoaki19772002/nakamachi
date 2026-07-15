@@ -60,16 +60,22 @@ const handler = async (req, res) => {
   }
 
   const rawBody = await readRawBody(req);
+  const receivedSignature = req.headers['x-line-signature'];
 
-  if (!isValidSignature(rawBody, req.headers['x-line-signature'])) {
-    res.status(403).json({
-      error: 'invalid signature',
-      debug: {
-        rawBodyLength: rawBody.length,
-        secretLength: (process.env.LINE_CHANNEL_SECRET || '').length,
-        secretIsSet: !!process.env.LINE_CHANNEL_SECRET
-      }
-    });
+  if (!isValidSignature(rawBody, receivedSignature)) {
+    const expected = crypto
+      .createHmac('sha256', process.env.LINE_CHANNEL_SECRET || '')
+      .update(rawBody)
+      .digest('base64');
+    console.log('SIGNATURE_DEBUG', JSON.stringify({
+      rawBodyLength: rawBody.length,
+      rawBodyPreview: rawBody.toString('utf8').slice(0, 300),
+      receivedSignature,
+      expectedSignature: expected,
+      secretLength: (process.env.LINE_CHANNEL_SECRET || '').length,
+      contentType: req.headers['content-type']
+    }));
+    res.status(403).json({ error: 'invalid signature' });
     return;
   }
 
