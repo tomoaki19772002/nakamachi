@@ -181,6 +181,16 @@
       color: #e65100;
     }
 
+    .history-chip-label {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-chip.visited {
+      background: #cfd8dc;
+      color: #37474f;
+    }
+
     .history-chip-del {
       display: flex;
       align-items: center;
@@ -384,7 +394,7 @@
         } else {
           setStatus(`${num}番はLINE未登録です`, 'unsent');
         }
-        history.unshift({ id: Date.now() + Math.random(), number: num, sent: !!data.sent });
+        history.unshift({ id: Date.now() + Math.random(), number: num, sent: !!data.sent, visited: false });
         renderHistory();
       } catch (e) {
         setStatus('送信に失敗しました。通信環境を確認してください', 'error');
@@ -408,10 +418,16 @@
       historyEmptyEl.style.display = 'none';
       history.forEach(item => {
         const chip = document.createElement('span');
-        chip.className = 'history-chip' + (item.sent ? '' : ' unsent');
+        chip.className = 'history-chip' + (item.sent ? '' : ' unsent') + (item.visited ? ' visited' : '');
 
         const label = document.createElement('span');
-        label.textContent = `${item.number}番${item.sent ? '' : '（未登録）'}`;
+        label.className = 'history-chip-label';
+        label.textContent = `${item.visited ? '✓ ' : ''}${item.number}番${item.sent ? '' : '（未登録）'}`;
+        label.title = '来院済みに切り替え';
+        label.addEventListener('click', () => {
+          item.visited = !item.visited;
+          renderHistory();
+        });
 
         const del = document.createElement('button');
         del.className = 'history-chip-del';
