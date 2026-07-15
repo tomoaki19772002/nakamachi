@@ -19,6 +19,10 @@ function isValidSignature(rawBody, signature) {
   return signature === expected;
 }
 
+function toHalfWidthDigits(text) {
+  return text.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+}
+
 async function replyMessage(replyToken, text) {
   await fetch('https://api.line.me/v2/bot/message/reply', {
     method: 'POST',
@@ -40,7 +44,7 @@ async function handleEvent(event) {
   }
 
   if (event.type === 'message' && event.message && event.message.type === 'text') {
-    const num = Number(event.message.text.trim());
+    const num = Number(toHalfWidthDigits(event.message.text.trim()));
     const userId = event.source && event.source.userId;
 
     if (Number.isInteger(num) && num >= 1 && num <= 100 && userId) {

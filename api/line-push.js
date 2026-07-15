@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     },
     body: JSON.stringify({
       to: registration.userId,
-      messages: [{ type: 'text', text: `${num}番の方、受付までお戻りください。` }]
+      messages: [{ type: 'text', text: `${num}番の方、受付までお戻り頂き、受付スタッフにお声をおかけください。` }]
     })
   });
 
